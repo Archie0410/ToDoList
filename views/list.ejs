@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>To-Do List</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <h1>📝 My To-Do List</h1>
+  </header>
+
+  <!-- Add Todo Form -->
+  <div class="box">
+    <form action="/add" method="POST" onsubmit="return validateForm()">
+      <input type="text" name="task" id="taskInput" placeholder="Enter a new task..." />
+      <select name="priority">
+        <option value="low">Low</option>
+        <option value="medium" selected>Medium</option>
+        <option value="high">High</option>
+      </select>
+      <button type="submit">Add</button>
+    </form>
+  </div>
+
+  <!-- Filter Options -->
+  <div class="box">
+    <strong>Filter by Priority:</strong>
+    <a href="/" class="<%= !filter ? 'active-filter' : '' %>">All</a>
+    <a href="/?priority=high" class="<%= filter === 'high' ? 'active-filter' : '' %>">High</a>
+    <a href="/?priority=medium" class="<%= filter === 'medium' ? 'active-filter' : '' %>">Medium</a>
+    <a href="/?priority=low" class="<%= filter === 'low' ? 'active-filter' : '' %>">Low</a>
+  </div>
+
+  <!-- Task List -->
+  <% if (todos.length > 0) { %>
+    <% todos.forEach(todo => { %>
+      <div class="box todo-item <%= todo.priority %>">
+        <form action="/edit/<%= todo._id %>" method="POST">
+          <input type="text" name="updatedTask" value="<%= todo.task %>" />
+          <select name="updatedPriority">
+            <option value="low" <%= todo.priority === 'low' ? 'selected' : '' %>>Low</option>
+            <option value="medium" <%= todo.priority === 'medium' ? 'selected' : '' %>>Medium</option>
+            <option value="high" <%= todo.priority === 'high' ? 'selected' : '' %>>High</option>
+          </select>
+          <button type="submit">Save</button>
+        </form>
+        <form action="/delete/<%= todo._id %>" method="POST" class="delete-form" onsubmit="return confirm('Are you sure you want to delete this task?');">
+          <input type="checkbox" class="complete-checkbox" title="Mark as done" />
+          <button type="submit" style="display: none;">Delete</button>
+        </form>
+             
+      </div>
+    <% }) %>
+  <% } else { %>
+    <div class="box">No tasks found for this filter.</div>
+  <% } %>
+
+  <!-- Footer -->
+  <footer>
+    <p>Made by Archana</p>
+  </footer>
+
+  <script>
+    function validateForm() {
+      const taskInput = document.getElementById("taskInput");
+      if (taskInput.value.trim() === "") {
+        alert("Please enter a task before submitting.");
+        return false;
+      }
+      return true;
+    }
+  </script>
+  <script>
+    // Mark task visually complete
+    document.querySelectorAll('.complete-checkbox').forEach(checkbox => {
+      checkbox.addEventListener('change', function () {
+        if (this.checked) {
+          const parentBox = this.closest('.todo-item');
+          parentBox.classList.add('completed');
+  
+          // Optionally delay delete (or just visual feedback)
+          // Uncomment the below line if you want it to auto-delete after delay
+          setTimeout(() => this.form.submit(), 3000);
+        } else {
+          this.closest('.todo-item').classList.remove('completed');
+        }
+      });
+    });
+  </script>
+  
+</body>
+</html>

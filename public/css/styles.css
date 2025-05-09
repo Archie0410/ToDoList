@@ -1,0 +1,125 @@
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f7f3fc;
+  margin: 0;
+  padding: 0;
+  color: #333;
+}
+
+header, footer {
+  background-color: #5e3ea1;
+  color: white;
+  padding: 1rem 0;
+  text-align: center;
+}
+
+footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+}
+
+h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.box {
+  background-color: white;
+  margin: 1.2rem auto;
+  padding: 1rem;
+  max-width: 650px;
+  border-radius: 12px;
+  box-shadow: 0 3px 8px rgba(94, 62, 161, 0.15);
+}
+
+input[type="text"], select {
+  padding: 0.5rem;
+  margin-right: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid #d0c4eb;
+  border-radius: 6px;
+  background-color: #faf8ff;
+  color: #333;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  background-color: #7b4de4;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #673ac8;
+}
+
+/* Priority Color Coding */
+.todo-item.high {
+  border-left: 8px solid #e74c3c; /* red */
+}
+
+.todo-item.medium {
+  border-left: 8px solid #e67e22; /* orange */
+}
+
+.todo-item.low {
+  border-left: 8px solid #2ecc71; /* green */
+}
+
+.todo-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.todo-item form {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Filter Links */
+.box a {
+  margin: 0 5px;
+  text-decoration: none;
+  color: #7b4de4;
+  font-weight: bold;
+}
+
+.box a.active-filter {
+  text-decoration: underline;
+  color: #5e3ea1;
+}
+
+.delete-form input[type="checkbox"] {
+  transform: scale(1.3);
+  cursor: pointer;
+}
+.todo-item.completed {
+  opacity: 0.6;
+  text-decoration: line-through;
+  transition: all 0.3s ease;
+}
+.todo-item.completed:hover {
+  opacity: 1;
+  text-decoration: none;
+}
+/* Responsive Design */
+@media (max-width: 600px) {
+  .box {
+    width: 90%;
+    margin: 1rem auto;
+  }
+  header, footer {
+    padding: 0.5rem 0;
+  }
+  h1 {
+    font-size: 1.5rem;
+  }
+}
