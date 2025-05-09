@@ -7,15 +7,22 @@ const mongoose = require("mongoose");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  serverSelectionTimeoutMS: 30000 // Increase server selection timeout to 30s
-}).then(() => {
-  console.log("MongoDB connected");
-}).catch(err => {
-  console.error("MongoDB connection error:", err);
-});
+const connectWithRetry = () => {
+  mongoose.connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 30000,
+    socketTimeoutMS: 45000
+  }).then(() => {
+    console.log("MongoDB connected");
+  }).catch(err => {
+    console.error("MongoDB connection error. Retrying in 5 seconds...", err);
+    setTimeout(connectWithRetry, 5000);
+  });
+};
+
+connectWithRetry();
+
 
 // Mongoose Schema and Model
 const todoSchema = new mongoose.Schema({
