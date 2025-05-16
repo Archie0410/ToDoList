@@ -4,15 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>To-Do List</title>
-  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="/css/styles.css" />
 </head>
 <body>
-  <!-- Header -->
   <header>
     <h1>📝 My To-Do List</h1>
   </header>
 
-  <!-- Add Todo Form -->
   <div class="box">
     <form action="/add" method="POST" onsubmit="return validateForm()">
       <input type="text" name="task" id="taskInput" placeholder="Enter a new task..." />
@@ -25,7 +23,6 @@
     </form>
   </div>
 
-  <!-- Filter Options -->
   <div class="box">
     <strong>Filter by Priority:</strong>
     <a href="/" class="<%= !filter ? 'active-filter' : '' %>">All</a>
@@ -34,7 +31,6 @@
     <a href="/?priority=low" class="<%= filter === 'low' ? 'active-filter' : '' %>">Low</a>
   </div>
 
-  <!-- Task List -->
   <% if (todos.length > 0) { %>
     <% todos.forEach(todo => { %>
       <div class="box todo-item <%= todo.priority %>">
@@ -51,14 +47,12 @@
           <input type="checkbox" class="complete-checkbox" title="Mark as done" />
           <button type="submit" style="display: none;">Delete</button>
         </form>
-             
       </div>
     <% }) %>
   <% } else { %>
     <div class="box">No tasks found for this filter.</div>
   <% } %>
 
-  <!-- Footer -->
   <footer>
     <p>Made by Archana</p>
   </footer>
@@ -72,24 +66,20 @@
       }
       return true;
     }
-  </script>
-  <script>
-    // Mark task visually complete
+
     document.querySelectorAll('.complete-checkbox').forEach(checkbox => {
       checkbox.addEventListener('change', function () {
+        const parentBox = this.closest('.todo-item');
         if (this.checked) {
-          const parentBox = this.closest('.todo-item');
           parentBox.classList.add('completed');
-  
-          // Optionally delay delete (or just visual feedback)
-          // Uncomment the below line if you want it to auto-delete after delay
-          setTimeout(() => this.form.submit(), 3000);
+          setTimeout(() => {
+            this.nextElementSibling.click();
+          }, 3000);
         } else {
-          this.closest('.todo-item').classList.remove('completed');
+          parentBox.classList.remove('completed');
         }
       });
     });
   </script>
-  
 </body>
 </html>

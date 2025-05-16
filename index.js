@@ -1,102 +1,50 @@
-require('dotenv').config();
-const express = require("express");
-const bodyParser = require("body-parser");
-const path = require("path");
-const mongoose = require("mongoose");
-
+const express = require('express');
+const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-const allowedPriorities = ["low", "medium", "high"];
+app.set('view engine', 'ejs');
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static('public'));
 
-const connectWithRetry = () => {
-  mongoose.connect(process.env.MONGODB_URI, {
-    serverSelectionTimeoutMS: 30000,
-    socketTimeoutMS: 45000
-  }).then(() => {
-    console.log("MongoDB connected");
-  }).catch(err => {
-    console.error("MongoDB connection error. Retrying in 5 seconds...", err);
-    setTimeout(connectWithRetry, 5000);
-  });
-};
+// MongoDB connection
+mongoose.connect('mongodb://localhost:27017/todoDB', { useNewUrlParser: true, useUnifiedTopology: true });
 
-connectWithRetry();
-
-// Mongoose Schema and Model
+// Mongoose model
 const todoSchema = new mongoose.Schema({
   task: String,
-  priority: { type: String, default: "medium" }
+  priority: String
 });
-const Todo = mongoose.model("Todo", todoSchema);
+const Todo = mongoose.model('Todo', todoSchema);
 
-// Middleware
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "public")));
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views"));
+// Routes
+app.get('/', async (req, res) => {
+  const filter = req.query.priority;
+  const todos = filter ? await Todo.find({ priority: filter }) : await Todo.find();
+  res.render('list', { todos, filter });
+});
 
-// Home Route - List Todos with Optional Filter
-app.get("/", async (req, res) => {
-  const { priority } = req.query;
-  try {
-    const filter = allowedPriorities.includes(priority) ? { priority } : {};
-    const todos = await Todo.find(filter);
-    res.render("list", { todos, filter: priority });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Error loading tasks.");
+app.post('/add', async (req, res) => {
+  const { task, priority } = req.body;
+  if (task.trim() !== '') {
+    await Todo.create({ task, priority });
   }
+  res.redirect('/');
 });
 
-// Add Todo
-app.post("/add", async (req, res) => {
-  let { task, priority } = req.body;
-  if (!task || !task.trim()) return res.redirect("/");
-  if (!allowedPriorities.includes(priority)) priority = "medium";
-
-  try {
-    await Todo.create({ task: task.trim(), priority });
-    res.redirect("/");
-  } catch (err) {
-    console.error(err);
-    res.redirect("/");
-  }
+app.post('/edit/:id', async (req, res) => {
+  const { updatedTask, updatedPriority } = req.body;
+  await Todo.findByIdAndUpdate(req.params.id, {
+    task: updatedTask,
+    priority: updatedPriority
+  });
+  res.redirect('/');
 });
 
-// Edit Todo
-app.post("/edit/:id", async (req, res) => {
-  const { id } = req.params;
-  let { updatedTask, updatedPriority } = req.body;
-
-  if (!updatedTask || !updatedTask.trim()) return res.redirect("/");
-  if (!allowedPriorities.includes(updatedPriority)) updatedPriority = "medium";
-
-  try {
-    await Todo.findByIdAndUpdate(id, {
-      task: updatedTask.trim(),
-      priority: updatedPriority
-    });
-    res.redirect("/");
-  } catch (err) {
-    console.error(err);
-    res.redirect("/");
-  }
+app.post('/delete/:id', async (req, res) => {
+  await Todo.findByIdAndDelete(req.params.id);
+  res.redirect('/');
 });
 
-// Delete Todo
-app.post("/delete/:id", async (req, res) => {
-  const { id } = req.params;
-  try {
-    await Todo.findByIdAndDelete(id);
-    res.redirect("/");
-  } catch (err) {
-    console.error(err);
-    res.redirect("/");
-  }
-});
-
-// Start Server
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+// Start server
+app.listen(3000, () => console.log('Server started on http://localhost:3000'));
