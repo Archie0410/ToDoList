@@ -7,10 +7,10 @@ const mongoose = require("mongoose");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const allowedPriorities = ["low", "medium", "high"];
+
 const connectWithRetry = () => {
   mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
     serverSelectionTimeoutMS: 30000,
     socketTimeoutMS: 45000
   }).then(() => {
@@ -22,7 +22,6 @@ const connectWithRetry = () => {
 };
 
 connectWithRetry();
-
 
 // Mongoose Schema and Model
 const todoSchema = new mongoose.Schema({
@@ -41,7 +40,7 @@ app.set("views", path.join(__dirname, "views"));
 app.get("/", async (req, res) => {
   const { priority } = req.query;
   try {
-    const filter = priority ? { priority } : {};
+    const filter = allowedPriorities.includes(priority) ? { priority } : {};
     const todos = await Todo.find(filter);
     res.render("list", { todos, filter: priority });
   } catch (err) {
@@ -52,11 +51,12 @@ app.get("/", async (req, res) => {
 
 // Add Todo
 app.post("/add", async (req, res) => {
-  const { task, priority } = req.body;
-  if (!task.trim()) return res.redirect("/");
+  let { task, priority } = req.body;
+  if (!task || !task.trim()) return res.redirect("/");
+  if (!allowedPriorities.includes(priority)) priority = "medium";
 
   try {
-    await Todo.create({ task, priority: priority || "medium" });
+    await Todo.create({ task: task.trim(), priority });
     res.redirect("/");
   } catch (err) {
     console.error(err);
@@ -67,12 +67,15 @@ app.post("/add", async (req, res) => {
 // Edit Todo
 app.post("/edit/:id", async (req, res) => {
   const { id } = req.params;
-  const { updatedTask, updatedPriority } = req.body;
+  let { updatedTask, updatedPriority } = req.body;
+
+  if (!updatedTask || !updatedTask.trim()) return res.redirect("/");
+  if (!allowedPriorities.includes(updatedPriority)) updatedPriority = "medium";
 
   try {
     await Todo.findByIdAndUpdate(id, {
-      task: updatedTask,
-      priority: updatedPriority || "medium"
+      task: updatedTask.trim(),
+      priority: updatedPriority
     });
     res.redirect("/");
   } catch (err) {
