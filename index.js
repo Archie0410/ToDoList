@@ -1,14 +1,20 @@
-require('dotenv').config(); // Load env variables from .env locally
+require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const app = express();
+const methodOverride = require('method-override');
 
+
+const app = express();
+app.use(methodOverride('_method'));
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-// Use environment variable for MongoDB connection URI, fallback to local MongoDB
+// Method override for PUT and DELETE
+app.use(methodOverride('_method'));
+
+// MongoDB URI
 const mongoURI = process.env.MONGO_URI || 'mongodb://localhost:27017/todoDB';
 
 mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -45,7 +51,7 @@ app.post('/add', async (req, res) => {
   }
 });
 
-app.post('/edit/:id', async (req, res) => {
+app.put('/edit/:id', async (req, res) => {
   try {
     const { updatedTask, updatedPriority } = req.body;
     await Todo.findByIdAndUpdate(req.params.id, {
@@ -58,7 +64,7 @@ app.post('/edit/:id', async (req, res) => {
   }
 });
 
-app.post('/delete/:id', async (req, res) => {
+app.delete('/delete/:id', async (req, res) => {
   try {
     await Todo.findByIdAndDelete(req.params.id);
     res.redirect('/');
@@ -67,6 +73,6 @@ app.post('/delete/:id', async (req, res) => {
   }
 });
 
-// Start server, use PORT from env or fallback to 3000
+// Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server started on http://localhost:${PORT}`));

@@ -34,7 +34,8 @@
   <% if (todos.length > 0) { %>
     <% todos.forEach(todo => { %>
       <div class="box todo-item <%= todo.priority %>">
-        <form action="/edit/<%= todo._id %>" method="POST">
+        <!-- EDIT FORM: uses PUT via method-override -->
+        <form action="/edit/<%= todo._id %>?_method=PUT" method="POST">
           <input type="text" name="updatedTask" value="<%= todo.task %>" />
           <select name="updatedPriority">
             <option value="low" <%= todo.priority === 'low' ? 'selected' : '' %>>Low</option>
@@ -43,7 +44,9 @@
           </select>
           <button type="submit">Save</button>
         </form>
-        <form action="/delete/<%= todo._id %>" method="POST" class="delete-form" onsubmit="return confirm('Are you sure you want to delete this task?');">
+
+        <!-- DELETE FORM: uses DELETE via method-override -->
+        <form action="/delete/<%= todo._id %>?_method=DELETE" method="POST" class="delete-form" onsubmit="return confirm('Are you sure you want to delete this task?');">
           <input type="checkbox" class="complete-checkbox" title="Mark as done" />
           <button type="submit" style="display: none;">Delete</button>
         </form>
@@ -73,7 +76,7 @@
         if (this.checked) {
           parentBox.classList.add('completed');
           setTimeout(() => {
-            this.nextElementSibling.click();
+            this.nextElementSibling.click(); // triggers the delete form's submit button
           }, 3000);
         } else {
           parentBox.classList.remove('completed');
