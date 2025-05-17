@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>To-Do List</title>
   <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
 <body>
   <header>
@@ -34,21 +35,29 @@
   <% if (todos.length > 0) { %>
     <% todos.forEach(todo => { %>
       <div class="box todo-item <%= todo.priority %>">
-        <!-- EDIT FORM: uses PUT via method-override -->
-        <form action="/edit/<%= todo._id %>?_method=PUT" method="POST">
-          <input type="text" name="updatedTask" value="<%= todo.task %>" />
+        <!-- Display View -->
+        <div class="display-view" id="view-<%= todo._id %>">
+          <span><strong><%= todo.task %></strong> — <%= todo.priority %></span>
+          <button type="button" onclick="enableEdit('<%= todo._id %>')" title="Edit Task">
+            <i class="fas fa-pen"></i>
+          </button>
+        </div>
+
+        <!-- Edit Form (Initially Hidden) -->
+        <form action="/edit/<%= todo._id %>?_method=PUT" method="POST" class="edit-form" id="form-<%= todo._id %>" style="display: none;">
+          <input type="text" name="updatedTask" value="<%= todo.task %>" required />
           <select name="updatedPriority">
             <option value="low" <%= todo.priority === 'low' ? 'selected' : '' %>>Low</option>
             <option value="medium" <%= todo.priority === 'medium' ? 'selected' : '' %>>Medium</option>
             <option value="high" <%= todo.priority === 'high' ? 'selected' : '' %>>High</option>
           </select>
-          <button type="submit">Save</button>
+          <button type="submit" title="Save Changes"><i class="fas fa-check"></i></button>
         </form>
 
-        <!-- DELETE FORM: uses DELETE via method-override -->
+        <!-- Delete Form -->
         <form action="/delete/<%= todo._id %>?_method=DELETE" method="POST" class="delete-form" onsubmit="return confirm('Are you sure you want to delete this task?');">
           <input type="checkbox" class="complete-checkbox" title="Mark as done" />
-          <button type="submit" style="display: none;">Delete</button>
+          <button type="submit" title="Delete Task"><i class="fas fa-trash"></i></button>
         </form>
       </div>
     <% }) %>
@@ -70,13 +79,18 @@
       return true;
     }
 
+    function enableEdit(id) {
+      document.getElementById(`view-${id}`).style.display = "none";
+      document.getElementById(`form-${id}`).style.display = "block";
+    }
+
     document.querySelectorAll('.complete-checkbox').forEach(checkbox => {
       checkbox.addEventListener('change', function () {
         const parentBox = this.closest('.todo-item');
         if (this.checked) {
           parentBox.classList.add('completed');
           setTimeout(() => {
-            this.nextElementSibling.click(); // triggers the delete form's submit button
+            this.nextElementSibling.click(); // triggers delete
           }, 3000);
         } else {
           parentBox.classList.remove('completed');

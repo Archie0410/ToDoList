@@ -123,3 +123,18 @@ button:hover {
     font-size: 1.5rem;
   }
 }
+.todo-item button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-left: 8px;
+}
+
+.todo-item button i {
+  font-size: 1rem;
+  color: #333;
+}
+
+.todo-item button:hover i {
+  color: #007bff;
+}
